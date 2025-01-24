@@ -86,5 +86,43 @@ namespace FinalProject.Infrastructure.Repositories
             await dbContext.SaveChangesAsync();
             return new { Message = "OK" };
         }
+
+        /// <summary>
+        /// Функция проверки сущности Данные пассажира (TicketData) на уникальность при создании.
+        /// </summary>
+        /// <param name="ticketData">Данные пассажира.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUnique(TicketData ticketData)
+        {
+            if (!string.IsNullOrWhiteSpace(ticketData.Seat))
+            {
+                var ticket = await dbContext.Tickets.AsNoTracking().FirstOrDefaultAsync(x => x.Id == ticketData.Id)
+                ?? throw new NotFoundException($"Билет с идентификатором {ticketData.Id} не найдены.");
+
+                if (await dbContext.Tickets.Where(x => x.OperatorId == ticket.OperatorId && x.Flight == ticket.Flight && x.DepartureDate == ticket.DepartureDate && x.DeparturePlace == ticket.DeparturePlace)
+                        .AnyAsync(x => x.TicketData.Seat == ticketData.Seat))
+                    throw new NotUniqueException($"Место {ticketData.Seat} уже зарегистрировано.");
+            }            
+            return true;
+        }
+
+        /// <summary>
+        /// Функция проверки сущности Данные пассажира (TicketData) на уникальность при изменении.
+        /// </summary>
+        /// <param name="ticketData">Данные пассажира.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUniqueForUpdate(TicketData ticketData)
+        {
+            if (!string.IsNullOrWhiteSpace(ticketData.Seat))
+            {
+                var ticket = await dbContext.Tickets.AsNoTracking().FirstOrDefaultAsync(x => x.Id == ticketData.Id)
+                ?? throw new NotFoundException($"Билет с идентификатором {ticketData.Id} не найдены.");
+
+                if (await dbContext.Tickets.Where(x => x.OperatorId == ticket.OperatorId && x.Flight == ticket.Flight && x.DepartureDate == ticket.DepartureDate && x.DeparturePlace == ticket.DeparturePlace)
+                        .AnyAsync(x => x.TicketData.Seat == ticketData.Seat && x.Id != ticketData.Id))
+                    throw new NotUniqueException($"Место {ticketData.Seat} уже зарегистрировано.");
+            }
+            return true;
+        }
     }
 }

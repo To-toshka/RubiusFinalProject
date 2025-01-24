@@ -8,12 +8,12 @@
         /// <summary>
         /// Имя пассажира.
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Фамилия пассажира.
         /// </summary>
-        public string Surname { get; set; }
+        public string? Surname { get; set; }
 
         /// <summary>
         /// Отчество пассажира.
@@ -28,21 +28,21 @@
         /// <summary>
         /// Цена билета.
         /// </summary>
-        public decimal Price { get; set; }
+        public decimal? Price { get; set; }
 
         /// <summary>
         /// Идентификатор бронирования.
         /// </summary>
-        public long ReservationId { get; set; }
+        public long? ReservationId { get; set; }
 
         /// <summary>
         /// Билет.
         /// </summary>
-        public Ticket Ticket { get; set; }
+        public Ticket? Ticket { get; set; }
 
         /// <summary>
         /// Бронирование.
         /// </summary>
-        public Reservation Reservation { get; set; }
+        public Reservation? Reservation { get; set; }
     }
 }

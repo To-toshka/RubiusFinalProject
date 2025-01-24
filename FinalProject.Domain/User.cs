@@ -8,12 +8,12 @@
         /// <summary>
         /// Логин пользователя.
         /// </summary>
-        public string Login {  get; set; }
+        public string? Login {  get; set; }
 
         /// <summary>
         /// Пароль пользователя.
         /// </summary>
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         /// <summary>
         /// Дата рождения пользователя.
@@ -23,7 +23,7 @@
         /// <summary>
         /// Электронная почта пользователя.
         /// </summary>
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         /// <summary>
         /// Бронирования пользователя.

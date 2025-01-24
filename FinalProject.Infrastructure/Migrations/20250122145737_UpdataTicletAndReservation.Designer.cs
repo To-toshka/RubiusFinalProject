@@ -3,6 +3,7 @@ using System;
 using FinalProject.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FinalProject.Infrastructure.Migrations
 {
     [DbContext(typeof(CustomDbContext))]
-    partial class CustomDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250122145737_UpdataTicletAndReservation")]
+    partial class UpdataTicletAndReservation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,15 +34,18 @@ namespace FinalProject.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Bank")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PaymentAccount")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -55,34 +61,32 @@ namespace FinalProject.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal?>("Amount")
+                    b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime?>("PaymentDate")
+                    b.Property<DateTime>("PaymentDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("PaymentNumber")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PaymentStatus")
-                        .HasColumnType("text");
-
                     b.Property<string>("RecipientBank")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("RecipientPaymentAccount")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long?>("ReservationId")
+                    b.Property<long>("ReservationId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("SenderBank")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SenderPaymentAccount")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long?>("UserId")
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -103,22 +107,24 @@ namespace FinalProject.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal?>("Commission")
+                    b.Property<decimal>("Commission")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTime?>("CreatedDate")
+                    b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ReservationNumber")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Status")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal?>("TotalPrice")
+                    b.Property<decimal>("TotalPrice")
                         .HasColumnType("numeric");
 
-                    b.Property<long?>("UserId")
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -133,31 +139,37 @@ namespace FinalProject.Infrastructure.Migrations
                     b.Property<long>("Id")
                         .HasColumnType("bigint");
 
-                    b.Property<DateTime?>("ArrivalDate")
+                    b.Property<DateTime>("ArrivalDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ArrivalPlace")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("DepartureDate")
+                    b.Property<DateTime>("DepartureDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DeparturePlace")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Flight")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<long?>("OperatorId")
+                    b.Property<long>("OperatorId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Status")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TicketClass")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TicketNumber")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -176,6 +188,7 @@ namespace FinalProject.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -183,7 +196,7 @@ namespace FinalProject.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<decimal?>("Price")
+                    b.Property<decimal>("Price")
                         .HasColumnType("decimal");
 
                     b.Property<long>("ReservationId")
@@ -194,6 +207,7 @@ namespace FinalProject.Infrastructure.Migrations
                         .HasColumnType("character varying(16)");
 
                     b.Property<string>("Surname")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -216,12 +230,15 @@ namespace FinalProject.Infrastructure.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Login")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Password")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -233,11 +250,15 @@ namespace FinalProject.Infrastructure.Migrations
                 {
                     b.HasOne("FinalProject.Domain.Reservation", "Reservation")
                         .WithOne("Payment")
-                        .HasForeignKey("FinalProject.Domain.Payment", "ReservationId");
+                        .HasForeignKey("FinalProject.Domain.Payment", "ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("FinalProject.Domain.User", "User")
                         .WithMany("Payments")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Reservation");
 
@@ -248,7 +269,9 @@ namespace FinalProject.Infrastructure.Migrations
                 {
                     b.HasOne("FinalProject.Domain.User", "User")
                         .WithMany("Reservations")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -263,7 +286,9 @@ namespace FinalProject.Infrastructure.Migrations
 
                     b.HasOne("FinalProject.Domain.Operator", "Operator")
                         .WithMany("Tickets")
-                        .HasForeignKey("OperatorId");
+                        .HasForeignKey("OperatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Operator");
 
@@ -295,7 +320,8 @@ namespace FinalProject.Infrastructure.Migrations
 
             modelBuilder.Entity("FinalProject.Domain.TicketData", b =>
                 {
-                    b.Navigation("Ticket");
+                    b.Navigation("Ticket")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("FinalProject.Domain.User", b =>

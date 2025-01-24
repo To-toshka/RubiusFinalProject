@@ -2,7 +2,9 @@
 using FinalProject.Application.Abstractions.Repositories;
 using FinalProject.Application.Abstractions.Services;
 using FinalProject.Application.DTO;
+using FinalProject.Application.Validators;
 using FinalProject.Domain;
+using FluentValidation;
 using System.Net.Sockets;
 
 namespace FinalProject.Application.Services
@@ -19,10 +21,17 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="ticketData">Данных пассажира.</param>
         /// <returns>Id данных пассажира.</returns>
-        public Task<long> Create(TicketDataDTO ticketData)
+        public async Task<long> Create(TicketDataDTO ticketData)
         {
+            TicketDataCreateValidator validator = new();
+            var validatorResult = await validator.ValidateAsync(ticketData);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
             var entity = mapper.Map<TicketData>(ticketData);
-            return ticketDataRepository.Create(entity);
+            await ticketDataRepository.IsUnique(entity);
+            return await ticketDataRepository.Create(entity);
         }
 
         /// <summary>
@@ -61,10 +70,17 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="ticketData">Данные пассажира.</param>
         /// <returns>Сообщение "OK".</returns>
-        public Task<object> Update(TicketDataDTO ticketData)
+        public async Task<object> Update(TicketDataDTO ticketData)
         {
+            TicketDataUpdateValidator validator = new();
+            var validatorResult = await validator.ValidateAsync(ticketData);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
             var entity = mapper.Map<TicketData>(ticketData);
-            return ticketDataRepository.Update(entity);
+            await ticketDataRepository.IsUniqueForUpdate(entity);
+            return await ticketDataRepository.Update(entity);
         }
     }
 }

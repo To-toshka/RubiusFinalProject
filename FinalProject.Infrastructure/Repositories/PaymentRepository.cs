@@ -75,6 +75,8 @@ namespace FinalProject.Infrastructure.Repositories
             var paymentForUpdate = await dbContext.Payments.FirstOrDefaultAsync(x => x.Id == payment.Id)
                 ?? throw new NotFoundException($"Оплата с идентификатором {payment.Id} не найдена.");
 
+            if (payment.PaymentNumber != null && paymentForUpdate.PaymentNumber != payment.PaymentNumber) paymentForUpdate.PaymentNumber = payment.PaymentNumber;
+            if (payment.PaymentStatus != null && paymentForUpdate.PaymentStatus != payment.PaymentStatus) paymentForUpdate.PaymentStatus = payment.PaymentStatus;
             if (payment.PaymentDate != null && paymentForUpdate.PaymentDate != payment.PaymentDate) paymentForUpdate.PaymentDate = payment.PaymentDate;
             if (payment.UserId != null && paymentForUpdate.UserId != payment.UserId) paymentForUpdate.UserId = payment.UserId;
             if (payment.ReservationId != null && paymentForUpdate.ReservationId != payment.ReservationId) paymentForUpdate.ReservationId = payment.ReservationId;
@@ -86,6 +88,31 @@ namespace FinalProject.Infrastructure.Repositories
 
             await dbContext.SaveChangesAsync();
             return new { Message = "OK" };
+        }
+
+        /// <summary>
+        /// Функция проверки сущности Оплата (Payment) на уникальность при создании.
+        /// </summary>
+        /// <param name="payment">Оплата.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUnique(Payment payment)
+        {
+            if (await dbContext.Payments.AsNoTracking().AnyAsync(x => x.ReservationId == payment.ReservationId))
+                throw new NotUniqueException($"К бронированию с ID {payment.ReservationId} уже привязана оплата.");
+            return true;
+        }
+
+        /// <summary>
+        /// Функция проверки сущности Оплата (Payment) на уникальность при изменении.
+        /// </summary>
+        /// <param name="payment">Оплата.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUniqueForUpdate(Payment payment)
+        {
+            if (payment.ReservationId != null
+                && await dbContext.Payments.AsNoTracking().AnyAsync(x => x.ReservationId == payment.ReservationId && x.Id != payment.Id))
+                throw new NotUniqueException($"К бронированию с ID {payment.ReservationId} уже привязана оплата.");
+            return true;
         }
     }
 }

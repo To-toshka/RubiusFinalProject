@@ -2,7 +2,9 @@
 using FinalProject.Application.Abstractions.Repositories;
 using FinalProject.Application.Abstractions.Services;
 using FinalProject.Application.DTO;
+using FinalProject.Application.Validators;
 using FinalProject.Domain;
+using FluentValidation;
 
 namespace FinalProject.Application.Services
 {
@@ -18,10 +20,17 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="user">Пользователь.</param>
         /// <returns>Id пользователя.</returns>
-        public Task<long> Create(UserDTO user)
+        public async Task<long> Create(UserDTO user)
         {
+            UserCreateValidator validator = new(); 
+            var validatorResult = await validator.ValidateAsync(user);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
             var entity = mapper.Map<User>(user);
-            return userRepository.Create(entity);
+            await userRepository.IsUnique(entity);
+            return await userRepository.Create(entity);
         }
 
         /// <summary>
@@ -29,9 +38,9 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="id">Уникальный идентификатор пользователя (User).</param>
         /// <returns>Сообщение "OK".</returns>
-        public Task<object> Delete(long id)
+        public async Task<object> Delete(long id)
         {
-            return userRepository.Delete(id);
+            return await userRepository.Delete(id);
         }
 
         /// <summary>
@@ -60,10 +69,17 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="user">Пользователь.</param>
         /// <returns>Сообщение "OK".</returns>
-        public Task<object> Update(UserDTO user)
+        public async Task<object> Update(UserDTO user)
         {
+            UserUpdateValidator validator = new();
+            var validatorResult = await validator.ValidateAsync(user);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
             var entity = mapper.Map<User>(user);
-            return userRepository.Update(entity);
+            await userRepository.IsUniqueForUpdate(entity);
+            return await userRepository.Update(entity);
         }
     }
 }

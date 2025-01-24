@@ -2,7 +2,9 @@
 using FinalProject.Application.Abstractions.Repositories;
 using FinalProject.Application.Abstractions.Services;
 using FinalProject.Application.DTO;
+using FinalProject.Application.Validators;
 using FinalProject.Domain;
+using FluentValidation;
 
 namespace FinalProject.Application.Services
 {
@@ -18,10 +20,17 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="newOperator">Перевозчик.</param>
         /// <returns>Id перевозчика.</returns>
-        public Task<long> Create(OperatorDTO newOperator)
+        public async Task<long> Create(OperatorDTO newOperator)
         {
+            OperatorCreateValidator validator = new();
+            var validatorResult = await validator.ValidateAsync(newOperator);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
             var entity = mapper.Map<Operator>(newOperator);
-            return operatorRepository.Create(entity);
+            await operatorRepository.IsUnique(entity);
+            return await operatorRepository.Create(entity);
         }
 
         /// <summary>
@@ -60,10 +69,17 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="dataOperator">Перевозчик.</param>
         /// <returns>Сообщение "OK".</returns>
-        public Task<object> Update(OperatorDTO dataOperator)
+        public async Task<object> Update(OperatorDTO dataOperator)
         {
+            OperatorUpdateValidator validator = new();
+            var validatorResult = await validator.ValidateAsync(dataOperator);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
             var entity = mapper.Map<Operator>(dataOperator);
-            return operatorRepository.Update(entity);
+            await operatorRepository.IsUniqueForUpdate(entity);
+            return await operatorRepository.Update(entity);
         }
     }
 }

@@ -2,7 +2,9 @@
 using FinalProject.Application.Abstractions.Repositories;
 using FinalProject.Application.Abstractions.Services;
 using FinalProject.Application.DTO;
+using FinalProject.Application.Validators;
 using FinalProject.Domain;
+using FluentValidation;
 
 namespace FinalProject.Application.Services
 {
@@ -40,10 +42,18 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="payment">Оплата.</param>
         /// <returns>Id оплаты.</returns>
-        public Task<long> Create(PaymentDTO payment)
+        public async Task<long> Create(PaymentDTO payment)
         {
+            PaymentCreateValidator validator = new();
+            var validatorResult = await validator.ValidateAsync(payment);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
+            payment.PaymentStatus = "Ожидает подтверждения";
             var entity = mapper.Map<Payment>(payment);
-            return paymentRepository.Create(entity);
+            await paymentRepository.IsUnique(entity);
+            return await paymentRepository.Create(entity);
         }
 
         /// <summary>
@@ -51,10 +61,17 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="payment">Оплата.</param>
         /// <returns>Сообщение "OK".</returns>
-        public Task<object> Update(PaymentDTO payment)
+        public async Task<object> Update(PaymentDTO payment)
         {
+            PaymentUpdateValidator validator = new();
+            var validatorResult = await validator.ValidateAsync(payment);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
             var entity = mapper.Map<Payment>(payment);
-            return paymentRepository.Update(entity);
+            await paymentRepository.IsUniqueForUpdate(entity);
+            return await paymentRepository.Update(entity);
         }
 
         /// <summary>

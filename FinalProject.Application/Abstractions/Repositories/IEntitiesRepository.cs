@@ -41,5 +41,19 @@ namespace FinalProject.Application.Abstractions.Repositories
         /// <param name="id">Уникальный идентификатор сущности.</param>
         /// <returns>Сообщение "OK".</returns>
         Task<object> Delete(long id);
+
+        /// <summary>
+        /// Проверка уникальности сущности при создании.
+        /// </summary>
+        /// <param name="t">Сущность.</param>
+        /// <returns></returns>
+        Task<bool> IsUnique(T t);
+
+        /// <summary>
+        /// Проверка уникальности сущности при изменении.
+        /// </summary>
+        /// <param name="t">Сущность.</param>
+        /// <returns></returns>
+        Task<bool> IsUniqueForUpdate(T t);
     }
 }

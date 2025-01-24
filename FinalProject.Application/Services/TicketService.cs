@@ -2,12 +2,9 @@
 using FinalProject.Application.Abstractions.Repositories;
 using FinalProject.Application.Abstractions.Services;
 using FinalProject.Application.DTO;
+using FinalProject.Application.Validators;
 using FinalProject.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FluentValidation;
 
 namespace FinalProject.Application.Services
 {
@@ -23,10 +20,17 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="ticket">Билет.</param>
         /// <returns>Id билета.</returns>
-        public Task<long> Create(TicketDTO ticket)
+        public async Task<long> Create(TicketDTO ticket)
         {
+            TicketCreateValidator validator = new();
+            var validatorResult = await validator.ValidateAsync(ticket);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
             var entity = mapper.Map<Ticket>(ticket);
-            return ticketRepository.Create(entity);
+            await ticketRepository.IsUnique(entity);
+            return await ticketRepository.Create(entity);
         }
 
         /// <summary>
@@ -65,10 +69,17 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="ticket">Билет.</param>
         /// <returns>Сообщение "OK".</returns>
-        public Task<object> Update(TicketDTO ticket)
+        public async Task<object> Update(TicketDTO ticket)
         {
+            TicketUpdateValidator validator = new();
+            var validatorResult = await validator.ValidateAsync(ticket);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
             var entity = mapper.Map<Ticket>(ticket);
-            return ticketRepository.Update(entity);
+            await ticketRepository.IsUniqueForUpdate(entity);
+            return await ticketRepository.Update(entity);
         }
 
     }

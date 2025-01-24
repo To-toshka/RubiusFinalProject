@@ -82,5 +82,33 @@ namespace FinalProject.Infrastructure.Repositories
             await dbContext.SaveChangesAsync();
             return new { Message = "OK" };
         }
+
+        /// <summary>
+        /// Функция проверки сущности Пользователь (User) на уникальность при создании.
+        /// </summary>
+        /// <param name="user">Пользователь.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUnique(User user)
+        {
+            if(await dbContext.Users.AsNoTracking().AnyAsync(x => x.Login == user.Login)) throw new NotUniqueException($"Логин {user.Login} уже занят.");
+            if (await dbContext.Users.AsNoTracking().AnyAsync(x => x.Email == user.Email)) throw new NotUniqueException($"Пользователь с почтой {user.Email} уже зарегистрирован.");
+            return true;
+        }
+
+        /// <summary>
+        /// Функция проверки сущности Пользователь (User) на уникальность при изменении.
+        /// </summary>
+        /// <param name="user">Пользователь.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUniqueForUpdate(User user)
+        {
+            if (!string.IsNullOrWhiteSpace(user.Login) 
+                && await dbContext.Users.AsNoTracking().AnyAsync(x => x.Login == user.Login && x.Id != user.Id)) 
+                    throw new NotUniqueException($"Логин {user.Login} уже занят.");
+            if (!string.IsNullOrWhiteSpace(user.Email) 
+                && await dbContext.Users.AnyAsync(x => x.Email == user.Email && x.Id != user.Id)) 
+                    throw new NotUniqueException($"Пользователь с почтой {user.Email} уже зарегистрирован.");
+            return true;
+        }
     }
 }

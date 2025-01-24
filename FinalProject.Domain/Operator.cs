@@ -8,7 +8,7 @@
         /// <summary>
         /// Название.
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Описание.
@@ -18,12 +18,12 @@
         /// <summary>
         /// Банк перевозчика.
         /// </summary>
-        public string Bank { get; set; }
+        public string? Bank { get; set; }
 
         /// <summary>
         /// Расчетный счет.
         /// </summary>
-        public string PaymentAccount { get; set; }
+        public string? PaymentAccount { get; set; }
 
         /// <summary>
         /// Билеты.

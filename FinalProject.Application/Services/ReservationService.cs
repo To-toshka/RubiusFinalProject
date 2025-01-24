@@ -2,7 +2,10 @@
 using FinalProject.Application.Abstractions.Repositories;
 using FinalProject.Application.Abstractions.Services;
 using FinalProject.Application.DTO;
+using FinalProject.Application.Validators;
 using FinalProject.Domain;
+using FluentValidation;
+using System.Net.Sockets;
 
 namespace FinalProject.Application.Services
 {
@@ -18,10 +21,19 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="reservation">Бронирование.</param>
         /// <returns>Id бронирования.</returns>
-        public Task<long> Create(ReservationDTO reservation)
+        public async Task<long> Create(ReservationDTO reservation)
         {
+            ReservationCreateValidator validator = new();
+            var validatorResult = await validator.ValidateAsync(reservation);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
+            reservation.CreatedDate = DateTime.UtcNow;
+            reservation.Status = "Ожидает оплаты";
             var entity = mapper.Map<Reservation>(reservation);
-            return reservationRepository.Create(entity);
+            await reservationRepository.IsUnique(entity);
+            return await reservationRepository.Create(entity);
         }
 
         /// <summary>
@@ -60,10 +72,17 @@ namespace FinalProject.Application.Services
         /// </summary>
         /// <param name="reservation">Бронирование.</param>
         /// <returns>Сообщение "OK".</returns>
-        public Task<object> Update(ReservationDTO reservation)
+        public async Task<object> Update(ReservationDTO reservation)
         {
+            ReservationUpdateValidator validator = new();
+            var validatorResult = await validator.ValidateAsync(reservation);
+            if (!validatorResult.IsValid)
+            {
+                throw new ValidationException(validatorResult.Errors);
+            }
             var entity = mapper.Map<Reservation>(reservation);
-            return reservationRepository.Update(entity);
+            await reservationRepository.IsUniqueForUpdate(entity);
+            return await reservationRepository.Update(entity);
         }
     }
 }

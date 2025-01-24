@@ -83,5 +83,33 @@ namespace FinalProject.Infrastructure.Repositories
             await dbContext.SaveChangesAsync();
             return new { Message = "OK" };
         }
+
+        /// <summary>
+        /// Функция проверки сущности Перевозчик (Operator) на уникальность при создании.
+        /// </summary>
+        /// <param name="newOperator">Перевозчик.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUnique(Operator newOperator)
+        {
+            if (await dbContext.Operators.AsNoTracking().AnyAsync(x => x.Name == newOperator.Name)) throw new NotUniqueException($"Перевозчик с именем {newOperator.Name} уже зарегестрирован.");
+            if (await dbContext.Operators.AsNoTracking().AnyAsync(x => x.PaymentAccount == newOperator.PaymentAccount)) throw new NotUniqueException($"Рассчетный счет {newOperator.PaymentAccount} уже зарегистрирован.");
+            return true;
+        }
+
+        /// <summary>
+        /// Функция проверки сущности Перевозчик (Operator) на уникальность при изменении.
+        /// </summary>
+        /// <param name="updataOperator">Перевозчик.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUniqueForUpdate(Operator updataOperator)
+        {
+            if (!string.IsNullOrWhiteSpace(updataOperator.Name)
+                && await dbContext.Operators.AsNoTracking().AnyAsync(x => x.Name == updataOperator.Name && x.Id != updataOperator.Id))
+                throw new NotUniqueException($"Перевозчик с именем {updataOperator.Name} уже зарегестрирован.");
+            if (!string.IsNullOrWhiteSpace(updataOperator.PaymentAccount)
+                && await dbContext.Operators.AnyAsync(x => x.PaymentAccount == updataOperator.PaymentAccount && x.Id != updataOperator.Id))
+                throw new NotUniqueException($"Рассчетный счет {updataOperator.PaymentAccount} уже зарегистрирован.");
+            return true;
+        }
     }
 }

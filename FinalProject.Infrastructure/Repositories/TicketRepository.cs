@@ -75,6 +75,7 @@ namespace FinalProject.Infrastructure.Repositories
             var ticketForUpdate = await dbContext.Tickets.FirstOrDefaultAsync(x => x.Id == ticket.Id)
                 ?? throw new NotFoundException($"Билет с идентификатором {ticket.Id} не найден.");
 
+            if (!string.IsNullOrWhiteSpace(ticket.TicketNumber) && ticketForUpdate.TicketNumber != ticket.TicketNumber) ticketForUpdate.TicketNumber = ticket.TicketNumber;
             if (!string.IsNullOrWhiteSpace(ticket.TicketClass) && ticketForUpdate.TicketClass != ticket.TicketClass) ticketForUpdate.TicketClass = ticket.TicketClass;
             if (!string.IsNullOrWhiteSpace(ticket.Status) && ticketForUpdate.Status != ticket.Status) ticketForUpdate.Status = ticket.Status;
             if (!string.IsNullOrWhiteSpace(ticket.Flight) && ticketForUpdate.Flight != ticket.Flight) ticketForUpdate.Flight = ticket.Flight;
@@ -86,6 +87,30 @@ namespace FinalProject.Infrastructure.Repositories
 
             await dbContext.SaveChangesAsync();
             return new { Message = "OK" };
+        }
+
+        /// <summary>
+        /// Функция проверки сущности Билет (Ticket) на уникальность при создании.
+        /// </summary>
+        /// <param name="ticket">Билет.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUnique(Ticket ticket)
+        {
+            if (await dbContext.Tickets.AsNoTracking().AnyAsync(x => x.TicketNumber == ticket.TicketNumber)) throw new NotUniqueException($"Билет с номером {ticket.TicketNumber} уже зарегистрирован в системе.");
+            return true;
+        }
+
+        /// <summary>
+        /// Функция проверки сущности Билет (Ticket) на уникальность при изменении.
+        /// </summary>
+        /// <param name="ticket">Билет.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUniqueForUpdate(Ticket ticket)
+        {
+            if (!string.IsNullOrWhiteSpace(ticket.TicketNumber)
+                && await dbContext.Tickets.AsNoTracking().AnyAsync(x => x.TicketNumber == ticket.TicketNumber && x.Id != ticket.Id))
+                throw new NotUniqueException($"Билет с номером {ticket.TicketNumber} уже зарегистрирован в системе.");
+            return true;
         }
     }
 }

@@ -5,6 +5,6 @@
         /// <summary>
         /// Уникальный идентификатор.
         /// </summary>
-        public long Id { get; set; }
+        public long? Id { get; set; }
     }
 }

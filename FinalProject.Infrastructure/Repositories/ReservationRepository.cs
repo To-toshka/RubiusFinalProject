@@ -2,6 +2,7 @@
 using FinalProject.Application.Exceptions;
 using FinalProject.Domain;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Sockets;
 
 namespace FinalProject.Infrastructure.Repositories
 {
@@ -75,7 +76,8 @@ namespace FinalProject.Infrastructure.Repositories
             var reservationForUpdate = await dbContext.Reservations.FirstOrDefaultAsync(x => x.Id == reservation.Id)
                 ?? throw new NotFoundException($"Бронирование с идентификатором {reservation.Id} не найдено.");
 
-            if (reservation.CreatedDate != null && reservationForUpdate.CreatedDate != reservation.CreatedDate) reservationForUpdate.CreatedDate = reservation.CreatedDate;
+
+            if (reservation.ReservationNumber != null && reservationForUpdate.ReservationNumber != reservation.ReservationNumber) reservationForUpdate.ReservationNumber = reservation.ReservationNumber;
             if (!string.IsNullOrWhiteSpace(reservation.Status) && reservationForUpdate.Status != reservation.Status) reservationForUpdate.Status = reservation.Status;
             if (reservation.TotalPrice != null && reservationForUpdate.TotalPrice != reservation.TotalPrice) reservationForUpdate.TotalPrice = reservation.TotalPrice;
             if (reservation.Commission != null && reservationForUpdate.Commission != reservation.Commission) reservationForUpdate.Commission = reservation.Commission;
@@ -83,6 +85,31 @@ namespace FinalProject.Infrastructure.Repositories
 
             await dbContext.SaveChangesAsync();
             return new { Message = "OK" };
+        }
+
+        /// <summary>
+        /// Функция проверки сущности Бронирование (Reservation) на уникальность при создании.
+        /// </summary>
+        /// <param name="reservation">Бронирование.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUnique(Reservation reservation)
+        {
+            if (await dbContext.Reservations.AsNoTracking().AnyAsync(x => x.ReservationNumber == reservation.ReservationNumber)) 
+                throw new NotUniqueException($"Бронирование с номером {reservation.ReservationNumber} уже зарегистрировано в системе.");
+            return true;
+        }
+
+        /// <summary>
+        /// Функция проверки сущности Бронирование (Reservation) на уникальность при изменении.
+        /// </summary>
+        /// <param name="reservation">Бронирование.</param>
+        /// <returns>true или сообщение об ошибке.</returns>
+        public async Task<bool> IsUniqueForUpdate(Reservation reservation)
+        {
+            if (!string.IsNullOrWhiteSpace(reservation.ReservationNumber)
+                && await dbContext.Reservations.AsNoTracking().AnyAsync(x => x.ReservationNumber == reservation.ReservationNumber && x.Id != reservation.Id)) 
+                    throw new NotUniqueException($"Бронирование с номером {reservation.ReservationNumber} уже зарегистрировано в системе.");
+            return true;
         }
     }
 }
